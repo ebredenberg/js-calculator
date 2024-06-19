@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laskin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id=calculator>
+        <input type="text" id="result" readonly>
+
+        <button id="multiply" onclick="showInResult('multiply')">*</button>
+        <button id="divide" onclick="showInResult('divide')">/</button>
+        <button id="subtract" onclick="showInResult('subtract')">-</button>
+        <button id="add" onclick="showInResult('add')">+</button>
+
+        <button id="nine" onclick="showInResult('nine')">9</button>
+        <button id="eight" onclick="showInResult('eight')">8</button>
+        <button id="seven" onclick="showInResult('seven')">7</button>
+
+        <button id="six" onclick="showInResult('six')">6</button>
+        <button id="five" onclick="showInResult('five')">5</button>
+        <button id="four" onclick="showInResult('four')">4</button>
+
+        <button id="three" onclick="showInResult('three')">3</button>
+        <button id="two" onclick="showInResult('two')">2</button>
+        <button id="one" onclick="showInResult('one')">1</button>
+
+        <button id="blank1" onclick="restart()">C</button>
+        <button id="zero" onclick="showInResult('zero')">0</button>
+        <button id="point" onclick="showInResult('point')">.</button>
+        <button id="delete" onclick="deleteLastEntry()">DEL</button>
+
+        <button id="equals" onclick="calculateAnswer()">=</button>
+
+    </div>
+    <script>
+        let currentValue = [];
+        let equation = undefined;
+
+        function showInResult(elementId) { // Shows user input in result box
+
+                let digit = document.getElementById(elementId).innerHTML;
+
+                if (currentValue[0] == null) { // Check if there are previous inputs
+                    if (digit === '+' || digit === '*' || digit === '/') {  // If there is no number in result, this doesn't let the user put an operator first
+                        if (equation === undefined) {
+                            alert("Please enter a number or '-' as the first character");
+                        } else {   
+                            currentValue.push(equation); // If there is a number, for example from previous calculation, this lets the user keep calculating with that number
+                            document.getElementById("result").value += digit;
+                            currentValue.push(digit);
+                        }
+                    } else { // If there is no previous input or the previous input is just a number from previous calculation, this makes the new number user has chosen as the one displayed in the result box
+                        document.getElementById("result").value = digit;
+                        currentValue.push(digit)
+                    }
+                } else {
+                    if (digit === '+' || digit === '*' || digit === '/') { // Checks to see that there aren't multiple operators when user inputs an operator
+                        if (currentValue.includes('+') || currentValue.includes('*') || currentValue.includes('/')) {
+                            alert("Can not use two operators")
+                        } else {
+                            document.getElementById("result").value += digit;
+                            currentValue.push(digit)
+                        }
+                    } else {
+                        document.getElementById("result").value += digit;
+                        currentValue.push(digit)
+                    }
+                }       
+
+            }
+
+        function calculate(a, op, b) { // Calculates the equation in the result box
+            switch(op) {
+                case '+':
+                    return a + b;
+                    break;
+                case '-':
+                    return a - b;
+                    break;
+                case '*':
+                    return a * b;
+                    break;
+                case '/':
+                    return a / b;
+                    break;
+            }
+        }
+
+        function calculateAnswer() { // Logic for '='-button
+            let op = '';
+            let opcounter = 0;
+            let a = undefined;
+            let b = undefined;
+            const lastElement = currentValue[currentValue.length - 1];
+
+
+            if (currentValue[0] == null) { // Does nothing if there are no inputs
+                doNothing();
+            } else {
+                for (let x of currentValue) { // Assigns numbers left of operator to a and right of operator to b. Works by counting how many operators it has seen. If 1 or more, it starts assigning the numbers to b
+                    if (x === '+' || x === '-' || x === '*' || x === '/') {
+                        if (x === '-' && a == undefined) {
+                            a = '-'
+                        } else if (x === '-' && a != 0 && b == undefined && opcounter != 1) {
+                            op = x;
+                            opcounter++
+                        } else if (x === '-') {
+                            b = '-'
+                        } else {
+                            op = x;
+                            opcounter++
+                        }
+                    } else {
+                        if (opcounter === 0) {
+                            if (a === undefined) {
+                                a = x;
+                            }
+                            else {
+                                a += x;
+                            }
+                        } else {
+                            if (b === undefined) {
+                                b = x;
+                            } else {
+                                b += x;
+                            }
+                        }
+                    }
+                }              
+            }
+
+            if (b === undefined) { // Checks if there are number inputs on each side of operator, does nothing if there isn't
+                doNothing();
+            } else {
+            equation = calculate(parseFloat(a), op, parseFloat(b)); 
+
+            document.getElementById("result").value = equation;
+            currentValue = [];
+            }
+        }
+
+        function restart(){ // Logic for 'C'-button, refreshes all inputs
+            document.getElementById("result").value = null;
+            currentValue = [];
+            equation = undefined;
+        }
+
+        function deleteLastEntry() { // Logic for 'DEL'-button, removes last input character from result box, and array that tracks input characters
+            currentValue.pop();
+            let newValue = document.getElementById("result").value;
+            newValue = newValue.slice(0, -1);
+
+            document.getElementById("result").value = newValue;
+        } 
+        function doNothing() { // Function to do nothing, so there aren't any errors in the console when used
+
+        }   
+    </script>
+</body>
+</html>
